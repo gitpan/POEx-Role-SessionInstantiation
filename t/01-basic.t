@@ -1,52 +1,70 @@
-use Test::More('tests', 11);
+use Test::More;
 use POE;
 use MooseX::Declare;
 
 my $test = 0;
 
-class My::Session with POEx::Role::SessionInstantiation
+class My::Session
 {
-    use 5.010;
+    use aliased 'POEx::Role::Event';
+    with 'POEx::Role::SessionInstantiation';
 
-    sub _start
-    {
-        my $self = shift(@_);
-        my $alias = shift(@_);
-        Test::More::pass('Start called');
-        $self->alias($alias);
-        $self->yield('foo');
-    }
-
-    sub _stop
+    method _stop is Event
     {
         Test::More::pass('Stop called');
     }
-
-    sub foo
+    
+    after _start(@args) is Event
     {
-        my $self = shift(@_);
+        Test::More::pass('Start called');
+        $self->yield('foo');
+    }
+
+    method foo is Event
+    {
         Test::More::pass('foo called');
         if($test == 0)
         {
             $self->poe()->kernel()->state
             (
                 'bar',
-                sub
+                method
                 {
-                    my $self = shift(@_);
                     Test::More::pass('bar called');
                     
-                    # create a named class instantiated object and post to it
-                    my $class1 = Moose::Meta::Class->create('My::SubSession', roles => ['POEx::Role::SessionInstantiation'], superclasses => ['Moose::Object']);
-                    $class1->add_method('blat', sub { Test::More::pass('blat called'); shift->poe->kernel->detach_myself(); });
-                    $class1->name->new({ options => { 'trace' => 1 }, alias => 'blat_alias' });
+                    class Foo  
+                    { 
+                        with 'POEx::Role::SessionInstantiation';
+                        use aliased 'POEx::Role::Event'; 
+                        after _start is Event 
+                        { 
+                            Test::More::pass('after _start called'); 
+                        } 
+                        method blat is Event 
+                        { 
+                            Test::More::pass('blat called'); 
+                        } 
+                    }
+
+                    Foo->new( options => { 'trace' => 1 }, alias => 'blat_alias' );
                     $self->post('blat_alias', 'blat');
                     
-                    # now do the same but anonymous
-                    my $class2 = Moose::Meta::Class->create_anon_class(roles => ['POEx::Role::SessionInstantiation'], superclasses => ['Moose::Object']);
-                    $class2->add_method('flarg', sub { Test::More::pass('flarg called'); shift->poe->kernel->detach_myself(); });
-                    my $obj = $class2->name->new({ options => { 'trace' => 1 }, alias => 'flarg_anon_alias' });
-                    $self->post('flarg_anon_alias', 'flarg');
+                    class Bar 
+                    { 
+                        with 'POEx::Role::SessionInstantiation';
+                        use aliased 'POEx::Role::Event'; 
+                        method flarg is Event 
+                        { 
+                            Test::More::pass('flarg called'); 
+                        } 
+                        before _stop is Event
+                        {
+                            Test::More::pass('before _stop called');
+                        }
+                    }
+
+                    Bar->new( options => { 'trace' => 1 }, alias => 'flarg_alias' );
+                    $self->post('flarg_alias', 'flarg');
                 }
             );
             $test++;
@@ -69,22 +87,25 @@ class My::Session with POEx::Role::SessionInstantiation
         $self->yield('bar');
     }
 
-    sub _default
+    method _default(@args) is Event
     {
-        my ($self) = (shift);
-        given($self->poe->state)
+        if($self->poe->state eq 'foo')
         {
-            when('foo') { Test::More::pass('default redirect foo'); }
-            when('bar') { Test::More::pass('default redirect bar'); }
+            $test++;
+            Test::More::pass('default redirect foo');
+        } 
+        elsif( $self->poe->state eq 'bar') 
+        { 
+            $test++;
+            Test::More::pass('default redirect bar');
         }
     }
-
-    1;
 }
 
-my $sess = My::Session->new({ options => { 'trace' => 1 }, args => [ 'test0' ] });
-my $sess2 = My::Session->new({ options => { 'trace' => 1 }, args => [ 'test1' ] });
+my $sess = My::Session->new( options => { 'trace' => 1 }, args => [ 'test0' ]);
+my $sess2 = My::Session->new( options => { 'trace' => 1 }, args => [ 'test1' ]);
 
 POE::Kernel->run();
-
+is($test, 4, 'defaults both executed');
+done_testing();
 1;

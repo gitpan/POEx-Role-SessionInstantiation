@@ -1,22 +1,18 @@
 ---
-name: POEx-Role-SessionInstantiation
-version: 0.01
+abstract: 'Moose Role for turning ordinary objects into POE sessions'
 author:
-  - 'Nicholas R. Perez <nperez@cpan.org>'
-abstract: A POE::Session implementation as a Moose::Role
+  - 'Nicholas Perez <nperez@cpan.org>'
+generated_by: 'Dist::Zilla::Plugin::MetaYAML version 1.092200'
 license: gpl
-resources:
-  license: http://opensource.org/licenses/gpl-license.php
-  repository: git://nickandperla.net/pxrsi.git/
-build_requires:
-  MooseX::Declare: 0.2
-  POE: 1.005
-  Test::More: 0
-provides:
-  POEx::Role::SessionInstantiation:
-    file: lib/POEx/Role/SessionInstantiation.pm
-    version: 0.01
-generated_by: Module::Build version 0.33
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
+name: POEx-Role-SessionInstantiation
+requires:
+  MooseX::Declare: 0.26
+  POE: 1.007
+  POEx::Types: 0.091420
+  Test::More: 0.92
+resources:
+  repository: git://github.com/nperez/psm.git
+version: 0.092280

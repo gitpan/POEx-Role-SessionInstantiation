@@ -1,331 +1,259 @@
 package POEx::Role::SessionInstantiation;
-use 5.010;
-use Moose::Role;
+our $VERSION = '0.092280';
+
 use MooseX::Declare;
-use Moose::Util::TypeConstraints;
-use POE;
 
-our $VERSION = '0.01';
+#ABSTRACT: A Moose Role for turning objects into POE Sessions
 
-use overload '""' => sub
-{ 
-    my $s = shift;
-    return $s->orig if $s->orig; 
-    return $s; 
-};
 
-use overload '!=' => sub
+#lexical hack to get a static variable
+my $anonymous_poe;
+
+role POEx::Role::SessionInstantiation
 {
-    return "$_[0]" ne "$_[1]";
-};
+    use MooseX::Types::Moose('Str', 'Int', 'Any', 'HashRef', 'Object', 'ArrayRef', 'Maybe');
+    use POEx::Types(':all');
+    use Moose::Util::TypeConstraints;
+    use POE;
 
-use overload '==' => sub
-{
-    return "$_[0]" eq "$_[1]";
-};
+    use aliased 'POEx::Role::Event', 'Event';
 
-has orig => ( is => 'rw', isa =>'Str');
-
-subtype Kernel 
-    => as 'POE::Kernel';
-
-subtype Session
-    => as 'POE::Session';
-
-subtype CanDoSession
-    => as 'Object',
-    => where { $_->does(__PACKAGE__) };
-
-has heap =>
-(
-    is => 'rw',
-    isa => 'Any',
-    default => sub { {} },
-    lazy => 1,
-);
-
-has options =>
-(
-    is => 'rw',
-    isa => 'HashRef',
-    default => sub { {} },
-    lazy => 1,
-);
-
-has poe =>
-(
-    is => 'ro',
-    isa => 'Object',
-    default => sub
-    {
-        my $class = class 
-        {
-            has sender  => ( is => 'rw', isa => 'Kernel | Session | CanDoSession', clearer => 'clear_sender'  );
-            has state   => ( is => 'rw', isa => 'Str', clearer => 'clear_state' );
-            has file    => ( is => 'rw', isa => 'Maybe[Str]', clearer => 'clear_file' );
-            has line    => ( is => 'rw', isa => 'Maybe[Str]', clearer => 'clear_line' );
-            has from    => ( is => 'rw', isa => 'Maybe[Str]', clearer => 'clear_from' );
-            has kernel  => ( is => 'rw', isa => 'Kernel', clearer => 'clear_kernel' );
-
-            sub clear
-            {
-                my $self = shift;
-                $self->clear_sender;
-                $self->clear_state;
-                $self->clear_file;
-                $self->clear_line;
-                $self->clear_from;
-                $self->clear_kernel;
-            }
-
-            sub restore
-            {
-                my $self = shift;
-                my $poe = shift;
-                $self->sender($poe->sender);
-                $self->state($poe->state);
-                $self->file($poe->file);
-                $self->line($poe->line);
-                $self->from($poe->from);
-                $self->kernel($poe->kernel);
-            }
-
-            sub clone
-            {
-                my $self = shift;
-                return $self->meta->clone_object($self);
-            }
-        };
-
-        $class->new_object({});
-    },
-    lazy => 1
-);
-
-has args =>
-(
-    is => 'rw',
-    isa => 'ArrayRef',
-    default => sub { [] },
-    lazy => 1
-);
-
-has alias =>
-(
-    is => 'rw',
-    isa => 'Str',
-    trigger => sub 
+    use overload '""' => sub
     { 
-        my ($self, $val) = (shift, shift);
-        # we need to check to make sure we are currently in a POE context
-        return if not defined($self->poe->kernel);
-        $POE::Kernel::poe_kernel->alias_set($val); 
-    },
-    clearer => '_clear_alias',
-);
+        my $s = shift;
+        return $s->orig if $s->orig; 
+        return $s; 
+    };
 
-has ID =>
-(
-    is => 'ro',
-    isa => 'Int',
-    default => sub { $POE::Kernel::poe_kernel->ID_session_to_id(shift) },
-    lazy => 1,
-);
-
-# this just stores the anonymous clone class we create for our instance
-has _self_meta =>
-(
-    is => 'rw',
-    isa => 'Class::MOP::Class'
-);
-
-# add some sugar for posting, yielding, and calling events
-sub post
-{
-    my ($self, $session, $event, @args) = @_;
-    confess('No POE context') if not defined($self->poe->kernel);
-    return $self->poe->kernel->post($session, $event, @args);
-}
-
-sub yield
-{
-    my ($self, $event, @args) = @_;
-    confess('No POE context') if not defined($self->poe->kernel);
-    return $self->poe->kernel->yield($event, @args);
-}
-
-sub call
-{
-    my ($self, $session, $event, @args) = @_;
-    confess('No POE context') if not defined($self->poe->kernel);
-    return $self->poe->kernel->call($session, $event, @args);
-}
-
-# some defaults for _start, _stop and _default
-sub _start
-{
-    my $self = shift;
-    if($self->alias)
+    use overload '!=' => sub
     {
-        # inside a poe context now, so fire the trigger
-        $self->alias($self->alias);
-    }
-}
+        return "$_[0]" ne "$_[1]";
+    };
 
-sub _stop 
-{ 
-    my $self = shift;
-    $self->clear_alias();
-}
-
-sub _default 
-{
-    my $self = shift;
-    my $string = $self->alias // $self;
-    my $state = $self->poe->state;
-    warn "Nonexistent '$state' event delivered to $string";
-}
-
-sub BUILD { 1; }
-
-after 'BUILD' => sub
-{
-    my $self = shift(@_);
-
-    #enable overload in the composed class (ripped from overload.pm)
+    use overload '==' => sub
     {
-        no strict 'refs';
-        no warnings 'redefine';
-        ${$self->meta->name . "::OVERLOAD"}{dummy}++;
-        *{$self->meta->name . "::()"} = sub {};
-    }
+        return "$_[0]" eq "$_[1]";
+    };
 
-    # we need a no-op bless here to activate the magic for overload
-    bless ({}, $self->meta->name);
+    has orig => ( is => 'rw', isa => Str );
 
-    if($self->options()->{'trace'})
+    has orig_name => ( is => 'rw', isa => Str );
+
+
+    has heap =>
+    (
+        is => 'rw',
+        isa => Any,
+        default => sub { {} },
+        lazy => 1,
+    );
+
+
+    has options =>
+    (
+        is => 'rw',
+        isa => HashRef,
+        default => sub { {} },
+        lazy => 1,
+    );
+
+
+    has poe =>
+    (
+        is => 'ro',
+        isa => Object,
+        lazy_build => 1,
+    );
+
+    sub _build_poe
     {
-        $self = $self->_clone_self();
-        my $meta = $self->meta();
-
-        foreach my $name ($meta->get_all_method_names)
+        if(!defined $anonymous_poe)
         {
-            # This is a hack, there has to be a better moose idiom for this
-
-            # Check to see if this method name is actually an attribute.
-            # We don't want to trace attribute calls
-            if ($meta->has_attribute($name))
+            $anonymous_poe = class 
             {
-                next;
-            }
+                use POEx::Types(':all');
+                use MooseX::Types::Moose('Maybe', 'Str');
 
-            # Check for clearers and builders, this is another hack
-            my $clearer = my $builder = $name;
-            if($name =~ /_clear_/)
-            {
-                $clearer =~ s/_clear_//g;
+                has sender  => ( is => 'rw', isa => Kernel|Session|DoesSessionInstantiation, clearer => 'clear_sender'  );
+                has state   => ( is => 'rw', isa => Str, clearer => 'clear_state' );
+                has file    => ( is => 'rw', isa => Maybe[Str], clearer => 'clear_file' );
+                has line    => ( is => 'rw', isa => Maybe[Str], clearer => 'clear_line' );
+                has from    => ( is => 'rw', isa => Maybe[Str], clearer => 'clear_from' );
+                has kernel  => ( is => 'rw', isa => Kernel, clearer => 'clear_kernel' );
 
-                if($meta->has_attribute($clearer))
+                method clear
                 {
-                    next;
+                    $self->clear_sender;
+                    $self->clear_state;
+                    $self->clear_file;
+                    $self->clear_line;
+                    $self->clear_from;
+                    $self->clear_kernel;
                 }
-            }
 
-            if($name =~ /_build_/)
-            {
-                $builder =~ s/_build_//g;
-
-                if($meta->has_attribute($builder))
+                method restore (Object $poe)
                 {
-                    next;
+                    $self->sender($poe->sender);
+                    $self->state($poe->state);
+                    $self->file($poe->file);
+                    $self->line($poe->line);
+                    $self->from($poe->from);
+                    $self->kernel($poe->kernel);
                 }
-            }
 
-            # Weed out any of the non-event methods from the Role
-            if(__PACKAGE__->meta->has_method($name))
-            {
-                next;
-            }
-
-            # Make sure the Moose::Object stuff doesn't get traced either
-            if('Moose::Object'->meta->has_method($name))
-            {
-                next;
-            }
-
-            # we have to use 'around' to gain access to the arguments
-            $meta->add_around_method_modifier
-            (
-                $name, 
-                sub
+                method clone
                 {
-                    my ($orig, $self, @etc) = @_;
-
-                    my $poe = $self->poe();
-                    my $state = $poe->state();
-                    my $file = $poe->file();
-                    my $line = $poe->line();
-
-                    POE::Kernel::_warn($self->ID(), " -> $state (from $file at $line)\n" );
-
-                    return $orig->($self, @etc);
+                    return $self->meta->clone_object($self);
                 }
-            );
+            };
         }
+        
+        return $anonymous_poe->name->new();
     }
 
-    #this registers us with the POE::Kernel
-    $POE::Kernel::poe_kernel->session_alloc($self, @{$self->args()});
-};
 
-sub clear_alias
-{
-    my $self = shift(@_);
-    $POE::Kernel::poe_kernel->alias_remove($self->alias());
-    $self->_clear_alias();
-}
+    has args =>
+    (
+        is => 'rw',
+        isa => ArrayRef,
+        default => sub { [] },
+        lazy => 1
+    );
 
-sub _invoke_state
-{
-    my $self    = shift(@_);
-    my $sender  = shift(@_); 
-    my $state   = shift(@_);
-    my $etc     = shift(@_); 
-    my $file    = shift(@_); 
-    my $line    = shift(@_); 
-    my $from    = shift(@_);
 
-    my $method = $self->meta()->find_method_by_name($state);
+    has alias =>
+    (
+        is => 'rw',
+        isa => Str,
+        trigger => sub
+        { 
+            # we need to check to make sure we are currently in a POE context
+            return if not defined($_[0]->poe->kernel);
+            $POE::Kernel::poe_kernel->alias_set($_[1]); 
+        },
+        clearer => '_clear_alias',
+    );
 
-    if(defined($method))
+
+    has ID =>
+    (
+        is => 'ro',
+        isa => Int,
+        default => sub { $POE::Kernel::poe_kernel->ID_session_to_id($_[0]) },
+        lazy => 1,
+    );
+
+    # this just stores the anonymous clone class we create for our instance
+    has _self_meta =>
+    (
+        is => 'rw',
+        isa => 'Class::MOP::Class'
+    );
+    # add some sugar for posting, yielding, and calling events
+    method post(SessionAlias|SessionID|Session|DoesSessionInstantiation $session, Str $event_name, @args) 
     {
-        my $poe = $self->poe();
+        confess('No POE context') if not defined($self->poe->kernel);
+        return $self->poe->kernel->post($session, $event_name, @args);
+    }
 
-        my $saved;
-        if(defined($poe->kernel))
+    method yield(Str $event_name, @args)
+    {
+        confess('No POE context') if not defined($self->poe->kernel);
+        return $self->poe->kernel->yield($event_name, @args);
+    }
+
+    method call(SessionAlias|SessionID|Session|DoesSessionInstantiation $session, Str $event_name, @args) 
+    {
+        confess('No POE context') if not defined($self->poe->kernel);
+        return $self->poe->kernel->call($session, $event_name, @args);
+    }
+
+
+    # some defaults for _start, _stop and _default
+    method _start(@args) is Event
+    {
+        if($self->alias)
         {
-            $saved = $poe->clone();
+            # inside a poe context now, so fire the trigger
+            $self->alias($self->alias);
+        }
+        1;
+    }
+
+    method _stop() is Event
+    { 
+        $self->clear_alias();
+        1;
+    }
+
+
+    method _default(ArrayRef $args?) is Event
+    {
+        my $string = defined($self->alias) ? $self->alias : $self->ID;
+        my $state = $self->poe->state;
+        warn "Nonexistent '$state' event delivered to $string";
+    }
+
+
+    method _child(Str $event, Session|DoesSessionInstantiation $child, Any $ret?) is Event
+    {
+        1;
+    }
+
+
+    method _parent(Session|DoesSessionInstantiation|Kernel $previous_parent, Session|DoesSessionInstantiation|Kernel $new_parent) is Event
+    {
+        1;
+    }
+
+    sub BUILD { 1; }
+
+    after BUILD(@args)
+    {
+        #enable overload in the composed class (ripped from overload.pm)
+        {
+            no strict 'refs';
+            no warnings 'redefine';
+            ${$self->meta->name . "::OVERLOAD"}{dummy}++;
+            *{$self->meta->name . "::()"} = sub {};
         }
 
-        $poe->sender($sender);
-        $poe->state($state);
-        $poe->file($file);
-        $poe->line($line);
-        $poe->from($from);
-        $poe->kernel($POE::Kernel::poe_kernel);
+        # we need a no-op bless here to activate the magic for overload
+        bless ({}, $self->meta->name);
+        
+        #this registers us with the POE::Kernel
+        $POE::Kernel::poe_kernel->session_alloc($self, @{$self->args()})
+            if not $self->orig;
+    };
 
-        my $return = $method->execute($self, @$etc);
-        $poe->clear();
-        $poe->restore($saved) if defined $saved;
-        return $return;
-
-    }
-    else
+    method clear_alias
     {
-        my $default = $self->meta()->find_method_by_name('_default');
+        $POE::Kernel::poe_kernel->alias_remove($self->alias());
+        $self->_clear_alias();
+    }
 
-        if(defined($default))
+    method _invoke_state(Kernel|Session|DoesSessionInstantiation $sender, Str $state, ArrayRef $etc, Str $file?, Int $line?, Str $from?)
+    {
+        my $method = $self->meta()->find_method_by_name($state);
+
+        if(defined($method))
         {
+            if($method->isa('Class::MOP::Method::Wrapped'))
+            {
+                my $orig = $method->get_original_method;
+                if(!$orig->meta->isa('Moose::Meta::Class') || !$orig->meta->does_role('POEx::Role::Event'))
+                {
+                    POE::Kernel::_warn($self->ID, " -> $state [WRAPPED], called from $file at $line, exists, but is not marked as an available event");
+                    return;
+                }
+
+            }
+            elsif(!$method->meta->isa('Moose::Meta::Class') || !$method->meta->does_role('POEx::Role::Event'))
+            {
+                POE::Kernel::_warn($self->ID, " -> $state, called from $file at $line, exists, but is not marked as an available event");
+                return;
+            }
+
             my $poe = $self->poe();
 
             my $saved;
@@ -341,136 +269,253 @@ sub _invoke_state
             $poe->from($from);
             $poe->kernel($POE::Kernel::poe_kernel);
 
-            my $return = $default->execute($self, @$etc);
+            POE::Kernel::_warn($self->ID(), " -> $state (from $file at $line)\n" )
+                if $self->options->{trace};
+
+            my $return = $method->execute($self, @$etc);
             $poe->clear();
             $poe->restore($saved) if defined $saved;
             return $return;
+
         }
         else
         {
-            # this idiom was taken from POE::Session
-            my $loggable_self = $POE::Kernel::poe_kernel->_data_alias_loggable($self);
-            POE::Kernel::_warn
-            (
-                "a '$state' event was sent from $file at $line to $loggable_self ",
-                "but $loggable_self has neither a handler for it ",
-                "nor one for _default\n"
-            );
+            my $default = $self->meta()->find_method_by_name('_default');
+
+            if(defined($default))
+            {
+                if($default->meta->isa('Class::MOP::Method::Wrapped'))
+                {
+                    my $orig = $default->get_original_default;
+                    if(!$orig->meta->isa('Moose::Meta::Class') || !$orig->meta->does_role('POEx::Role::Event'))
+                    {
+                        POE::Kernel::_warn($self->ID, " -> $state [WRAPPED], called from $file at $line, exists, but is not marked as an available event");
+                        return;
+                    }
+                }
+                elsif(!$default->meta->isa('Moose::Meta::Class') || !$default->meta->does_role('POEx::Role::Event'))
+                {
+                    POE::Kernel::_warn($self->ID, " -> $state, called from $file at $line, exists, but is not marked as an available event");
+                    return;
+                }
+                my $poe = $self->poe();
+
+                my $saved;
+                if(defined($poe->kernel))
+                {
+                    $saved = $poe->clone();
+                }
+
+                $poe->sender($sender);
+                $poe->state($state);
+                $poe->file($file);
+                $poe->line($line);
+                $poe->from($from);
+                $poe->kernel($POE::Kernel::poe_kernel);
+                
+                my $return = $default->execute($self, $etc);
+                $poe->clear();
+                $poe->restore($saved) if defined $saved;
+                return $return;
+            }
+            else
+            {
+                my $loggable_self = defined($self->alias) ? $self->alias : $self->ID;
+                POE::Kernel::_warn
+                (
+                    "a '$state' event was sent from $file at $line to $loggable_self ",
+                    "but $loggable_self has neither a handler for it ",
+                    "nor one for _default\n"
+                );
+            }
         }
     }
-}
 
-sub _register_state
-{
-    # only support inline state usage
-    my ($self, $method_name, $coderef) = @_;
-
-    confess ('$method_name undefined!') unless $method_name;
-
-    $self = $self->_clone_self();
-
-    if(!defined($coderef))
+    method _register_state (Str $method_name, CodeRef|MooseX::Method::Signatures::Meta::Method $coderef?, Str $ignore?)
     {
-        # we mean to remove this method
-        $self->meta()->remove_method($method_name);
-    }
-    else
-    {
-        # otherwise, it is either replace it or add it
-        my $method = $self->meta()->find_method_by_name($method_name);
+        
+        # per instance changes
+        $self = $self->_clone_self();
 
-        if(defined($method))
+        if(!defined($coderef))
         {
+            # we mean to remove this method
             $self->meta()->remove_method($method_name);
         }
-
-        my $new_method = Class::MOP::Method->wrap
-        (
-            $coderef, 
-            (
-                name => $method_name,
-                package_name => ref($self)
-            )
-        );
-
-        $self->meta()->add_method($method_name, $new_method);
-
-        # enable tracing on the added method if tracing is enabled
-        if($self->options()->{'trace'})
+        else
         {
-            my $meta = $self->meta();
-            $meta->add_around_method_modifier
-            (
-                $method_name, 
-                sub
+            # horrible hack to make sure wheel states get called how they want to be called
+            if($method_name =~ /POE::Wheel/)
+            {
+                $coderef = $self->_wheel_wrap_method($coderef);
+            }
+            # otherwise, it is either replace it or add it
+            my $method = $self->meta()->find_method_by_name($method_name);
+
+            if(defined($method))
+            {
+                $self->meta()->remove_method($method_name);
+            }
+            
+            my ($new_method, $superclass);
+
+            if(blessed($coderef) && $coderef->isa('MooseX::Method::Signatures::Meta::Method'))
+            {
+                $new_method = $coderef;
+                $superclass = 'MooseX::Method::Signatures::Meta::Method';
+                
+                if($new_method->isa('Moose::Meta::Class') && $new_method->does_role(Event))
                 {
-                    my ($orig, $self, @etc) = @_;
-
-                    my $poe = $self->poe();
-                    my $state = $poe->state();
-                    my $file = $poe->file();
-                    my $line = $poe->line();
-
-                    POE::Kernel::_warn($self->ID(), " -> $state (from $file at $line)\n" );
-
-                    return $orig->($self, @etc);
+                    $self->meta->add_method($method_name, $new_method);
+                    return;
                 }
+
+            }
+            else
+            {
+                $superclass = 'Moose::Meta::Method';
+                $new_method = Moose::Meta::Method->wrap
+                (
+                    $coderef, 
+                    (
+                        name => $method_name,
+                        package_name => ref($self)
+                    )
+                );
+            }
+            
+            my $anon = Moose::Meta::Class->create_anon_class
+            (
+                superclasses => [ $superclass ],
+                roles => [ Event ],
+                cache => 1,
             );
+
+            bless($new_method, $anon->name);
+ 
+            $self->meta->add_method($method_name, $new_method);
+
         }
     }
-}
 
-sub _clone_self
-{
-    my $self = shift;
-
-    my $meta = $self->meta();
-    my $anon = Moose::Meta::Class->create_anon_class
-    (   
-        superclasses => [ $meta->superclasses() ],
-        methods => { map { $_->name,  $_->body  } $meta->get_all_methods },
-        attributes => [ $meta->get_all_attributes() ],
-        roles => [ map { $_->name } $meta->calculate_all_roles() ] ,
-    );
-
-    # we need to hold on to the original stringification
-    my $orig = "$self";
-
-    #enable overload in the anonymous class (ripped from overload.pm)
+    # we need this to insure that wheel states get called how they think they should be called
+    # Note: this is a horrible hack.
+    method _wheel_wrap_method (CodeRef|MooseX::Method::Signatures::Meta::Method $ref)
     {
-        no strict 'refs';
-        no warnings 'redefine';
-        ${$anon->name . "::OVERLOAD"}{dummy}++;
-        *{$anon->name . "::()"} = sub {};
+        sub
+        {
+            my $obj = shift;
+            my $poe = $obj->poe;
+            my @args;
+            (
+                $args[OBJECT] , 
+                $args[SESSION], 
+                $args[KERNEL], 
+                $args[HEAP], 
+                $args[STATE],
+                $args[SENDER], 
+                $args[6], 
+                $args[CALLER_FILE], 
+                $args[CALLER_LINE], 
+                $args[CALLER_STATE],
+                $args[ARG0],
+                $args[ARG1],
+                $args[ARG2],
+                $args[ARG3],
+                $args[ARG4],
+                $args[ARG5],
+                $args[ARG6],
+                $args[ARG7],
+                $args[ARG8],
+                $args[ARG9],
+            ) = ($obj, $obj, $poe->kernel, $obj->heap, $poe->state, $poe->sender, undef, $poe->file, $poe->line, $poe->from, @_);
+
+            return $ref->(@args);
+        }
     }
 
-    # this bless not only reblesses into the anonymous class, but also activates overload
-    bless($self, $anon->name);
-
-    # we only want to store the original class stringification to fool POE
-    if(!defined($self->orig))
+    method _clone_self
     {
+        # we only need to clone once
+        if($self->orig)
+        {
+            return $self;
+        }
+
+        # we need to hold on to the original stringification
+        my $orig = "$self";
         $self->orig($orig);
+
+        my $meta = $self->meta();
+
+        $self->orig_name($meta->name);
+
+        my $anon = Moose::Meta::Class->create_anon_class
+        (   
+            superclasses => [ $meta->superclasses() ],
+            methods => { map { $_->name,  $_  } $meta->get_all_methods },
+            attributes => [ $meta->get_all_attributes() ],
+        );
+        
+        $anon->add_role($_) for @{$meta->roles};
+        
+        #enable overload in the anonymous class (ripped from overload.pm)
+        {
+            no strict 'refs';
+            no warnings 'redefine';
+            ${$anon->name . "::OVERLOAD"}{dummy}++;
+            *{$anon->name . "::()"} = sub {};
+        }
+        
+        my $stuff;
+        # need to copy all of the symbols over
+        foreach my $type (keys %{ $stuff = { SCALAR => '$', ARRAY => '@', HASH => '%', CODE => '&' } } )
+        {
+            my $symbols = $meta->get_all_package_symbols($type);
+            foreach my $key (keys %$symbols)
+            {
+                if(!$anon->has_package_symbol($stuff->{$type} . $key))
+                {
+                    if($type eq 'SCALAR')
+                    {
+                        $anon->add_package_symbol($stuff->{$type} . $key, ${$symbols->{$key}});
+                    }
+                    else
+                    {
+                        $anon->add_package_symbol($stuff->{$type} . $key, $symbols->{$key});
+                    }
+
+                }
+            }
+        }
+        # this bless not only reblesses into the anonymous class, but also activates overload
+        bless($self, $anon->name);
+
+        # and to keep our anonymous class from going out of scope, stash a reference into ourselves
+        $self->_self_meta($anon);
+
+        # And here is where we break POE encapsulation
+        $POE::Kernel::poe_kernel->[POE::Kernel::KR_SESSIONS]->{$orig}->[POE::Kernel::SS_SESSION] = $self;
+
+        return $self;
     }
-
-    # and to keep our anonymous class from going out of scope, stash a reference into ourselves
-    $self->_self_meta($anon);
-
-    # And here is where we break POE encapsulation
-    $POE::Kernel::poe_kernel->[POE::Kernel::KR_SESSIONS]->{$orig}->[POE::Kernel::SS_SESSION] = $self;
-
-    return $self;
-
 }
 
-no Moose::Role;
+
+1;
+
+
+
 
 =pod
 
 =head1 NAME
 
-POEx::Role::SessionInstantiation - A Moose::Role for plain old Perl objects in 
-a POE context
+POEx::Role::SessionInstantiation - A Moose Role for turning objects into POE Sessions
+
+=head1 VERSION
+
+version 0.092280
 
 =head1 SYOPSIS
 
@@ -478,14 +523,16 @@ a POE context
     use 5.010;
     use MooseX::Declare;
 
-    # using the role instantly makes it a POE::Session upon instantiation
-    class My::Class with POEx::Role::SessionInstantiation
+    class My::Class 
     {
-        # declared methods are all exposed as events to POE
-        sub foo
-        {
-            my ($self, @args) = @_;
+        # using the role instantly makes it a POE::Session upon instantiation
+        with 'POEx::Role::SessionInstantiation';
+        # alias the decorator
+        use aliased 'POEx::Role::Event';
 
+        # decorated methods are all exposed as events to POE
+        method foo (@args) is Event
+        {
             # This event is not only added through POE but also added as a 
             # method to each instance that happens to have 'foo' fired
 
@@ -504,31 +551,27 @@ a POE context
             $self->yield('bar');
         }
 
-        sub bar
+        method bar (@args)
         {
-            my ($self, @args) = @_;
-
             # $self is also safe to pass as a session reference
             # Or you can pass along $self->ID()
             $self->post($self, 'baz')
         }
 
-        sub baz
+        method baz (@args)
         {
-            my ($self, @args) = @_;
-
             # call also works too
             $self->call($self, 'added_event';
         }
     }
-
-    1;
 
     # Constructing the session takes all the normal options
     my $session = My::Class->new({ options => { trace => 1 } });
 
     # Still need to call ->run();
     POE::Kernel->run();
+
+
 
 =head1 DESCRIPTION
 
@@ -540,149 +583,6 @@ if supplied via the attribute or constructor argument, or defining a _default
 that warns if your object receives an event that it does not have.
 
 This role exposes your class' methods as POE events.
-
-=head1 ATTRIBUTES
-
-=over 4
-
-=item heap is: rw, isa: Any, default: {}, lazy: yes  
-
-A traditional POE::Session provides a set aside storage space for the session
-context and that space is provided via argument to event handlers. With this 
-Role, your object gains its own heap storage via this attribute.
-
-=item options is: rw, isa: HashRef, default: {}, lazy: yes
-
-In following the POE::Session API, sessions can take options that do various
-things related to tracing and debugging. By default, tracing => 1, will turn on
-tracing of POE event firing to your object. debug => 1, currently does nothing 
-but more object level tracing maybe enabled in future versions.
-
-=item args is: rw, isa: ArrayRef, default: [], lazy: yes
-
-POE::Session's constructor provides a mechanism for passing arguments that will
-end up as arguments to the _start event handler. This is the exact same thing.
-
-=item alias is: rw, isa: Str, clearer: clear_alias, trigger: registers alias
-
-This attribute controls your object's alias to POE. POE allows for more than
-one alias to be assigned to any given session, but this attribute only assumes
-a single alias will not attempt to keep track of all the aliases. Last alias
-set will be what is returned. Calling the clearer will remove the last alias
-set from POE and unset it. You must be inside a valid POE context for the 
-trigger to actually fire (ie, inside a event handler that has been invoked from
-POE). While this can be set at construction time, it won't be until _start that
-it will actually register with POE. If you override _start, don't forget to set
-this attribute again ( $self->alias($self->alias); ) or else your alias will 
-never get registered with POE.
-
-=item ID is: ro, isa: Int
-
-This attribute will return what your POE assigned Session ID is. Must only be
-accessed after your object has been fully built (ie. after any BUILD methods).
-This ID can be used, in addition to a reference to yourself, and your defined
-alias, by other Sessions for addressing events sent through POE to your object.
-
-=item poe is: ro, isa: Object
-
-The poe attribute provides runtime context for your object methods. It contains
-an anonymous object with it's own attributes and methods. Runtime context is 
-built for each individual event handler invocation and then torn down to avoid
-context crosstalk. It is important to only access this attribute from within a 
-POE invoked event handler. 
-
-POE ATTRIBUTES
-
-=over 4
-
-=item sender is: rw, isa: POE::Kernel | POE::Session | ->does(SessionInstant.)
-
-The sender of the current event can be access from here. Semantically the same
-as $_[+SENDER].
-
-=item state is: rw, isa: Str
-
-The state fired. This should match the current method name (unless of course
-within the _default event handler, then it will be the event name that was 
-invoked but did not exist in your object instance.
-
-=item [qw/file line from/] is: rw, isa: Maybe[Str]
-
-These attributes provide tracing information from within POE. From is actually
-not used in POE::Session as far as I can tell, but it is available just in 
-case.
-
-=item kernel is: rw, isa: POE::Kernel
-
-This is actually the POE::Kernel singleton provided as a little sugar instead
-of requiring use of $poe_kernel, etc. To make sure you are currently within a 
-POE context, check this attribute for definedness.
-
-=back
-
-POE PRIVATE METHODS
-
-=over 4
-
-=item clear()
-
-This will clear the all of the current context information.
-
-=item restore($poe)
-
-This will take another anonymous poe object and restore state.
-
-=item clone()
-
-This will clone the current anonymous poe object and return it.
-
-=back
-
-=back
-
-=head1 METHODS
-
-=over 4
-
-=item [qw/post yield call/]
-
-These are provided as sugar for the respective POE::Kernel methods.
-
-=item _start
-
-Provides a default _start event handler that will be invoked from POE once the
-Session is registered with POE. The default method only takes the alias 
-attribute and sets it again to activate the trigger. If this is overridden, 
-don't forget to set the alias again so the trigger can execute.
-
-=item _stop
-
-Provides a default _stop event handler that will be invoked from POE once the 
-Session's refcount from within POE has reached zero (no pending events, no
-event sources, etc). The default method merely clears out the alias.
-
-=item _default
-
-Provides a _default event handler to catch any POE event invocations that your
-instance does not actually have. Will 'warn' about the nonexistent state. A big
-difference from POE::Session is that the state and arguments are not rebundled 
-upon invocation of this event handler. Instead the attempted state will be
-available in the poe attribute and the arguments will be pass normally as an
-array.
-
-=back
-
-=head1 METHOD MODIFIERS
-
-=over 4
-
-=item after 'BUILD
-
-All of the magic for turning the constructed object into a Session happens in 
-this method. If a BUILD is not provided, a stub exists to make sure this advice
-is executed.
-
-=back
 
 =head1 NOTES
 
@@ -733,16 +633,190 @@ inside the after 'BUILD' advice, and also during event handler changes from POE
 the moral to this? If you need to overload "", !=, or == in your composed class
 things will likely break. You have been warned.
 
-=back
+=back 
 
 So please heed the warnings and don't blame me if this summons the terrasque 
 into your datacenter and you left your +5 gear at home.
 
+=head1 ATTRIBUTES
+
+=head2 heap is: rw, isa: Any, default: {}, lazy: yes  
+
+A traditional POE::Session provides a set aside storage space for the session
+context and that space is provided via argument to event handlers. With this 
+Role, your object gains its own heap storage via this attribute.
+
+=head2 options is: rw, isa: HashRef, default: {}, lazy: yes
+
+In following the POE::Session API, sessions can take options that do various
+things related to tracing and debugging. By default, tracing => 1, will turn on
+tracing of POE event firing to your object. debug => 1, currently does nothing 
+but more object level tracing maybe enabled in future versions.
+
+
+
+=head2 poe is: ro, isa: Object
+
+The poe attribute provides runtime context for your object methods. It contains
+an anonymous object with it's own attributes and methods. Runtime context is 
+built for each individual event handler invocation and then torn down to avoid
+context crosstalk. It is important to only access this attribute from within a 
+POE invoked event handler. 
+
+=head3 POE ATTRIBUTES
+
+=over 4
+
+=item sender is: rw, isa: POE::Kernel | POE::Session | ->does(SessionInstant.)
+
+The sender of the current event can be access from here. Semantically the same
+as $_[+SENDER].
+
+=item state is: rw, isa: Str
+
+The state fired. This should match the current method name (unless of course
+within the _default event handler, then it will be the event name that was 
+invoked but did not exist in your object instance.
+
+=item [qw/file line from/] is: rw, isa: Maybe[Str]
+
+These attributes provide tracing information from within POE. From is actually
+not used in POE::Session as far as I can tell, but it is available just in 
+case.
+
+=item kernel is: rw, isa: POE::Kernel
+
+This is actually the POE::Kernel singleton provided as a little sugar instead
+of requiring use of $poe_kernel, etc. To make sure you are currently within a 
+POE context, check this attribute for definedness.
+
+=back 
+
+=head3 POE PRIVATE METHODS
+
+=over 4
+
+=item clear()
+
+This will clear the all of the current context information.
+
+=item restore($poe)
+
+This will take another anonymous poe object and restore state.
+
+=item clone()
+
+This will clone the current anonymous poe object and return it.
+
+=back 
+
+
+
+=head2 args is: rw, isa: ArrayRef, default: [], lazy: yes
+
+POE::Session's constructor provides a mechanism for passing arguments that will
+end up as arguments to the _start event handler. This is the exact same thing.
+
+
+
+=head2 alias is: rw, isa: Str, clearer: clear_alias, trigger: registers alias
+
+This attribute controls your object's alias to POE. POE allows for more than
+one alias to be assigned to any given session, but this attribute only assumes
+a single alias will not attempt to keep track of all the aliases. Last alias
+set will be what is returned. Calling the clearer will remove the last alias
+set from POE and unset it. You must be inside a valid POE context for the 
+trigger to actually fire (ie, inside a event handler that has been invoked from
+POE). While this can be set at construction time, it won't be until _start that
+it will actually register with POE. If you override _start, don't forget to set
+this attribute again ( $self->alias($self->alias); ) or else your alias will 
+never get registered with POE.
+
+
+
+=head2 ID is: ro, isa: Int
+
+This attribute will return what your POE assigned Session ID is. Must only be
+accessed after your object has been fully built (ie. after any BUILD methods).
+This ID can be used, in addition to a reference to yourself, and your defined
+alias, by other Sessions for addressing events sent through POE to your object.
+
+
+
+=head1 METHODS
+
+=head2 [qw/post yield call/]
+
+These are provided as sugar for the respective POE::Kernel methods.
+
+
+
+=head2 _start(@args)
+
+Provides a default _start event handler that will be invoked from POE once the
+Session is registered with POE. The default method only takes the alias 
+attribute and sets it again to activate the trigger. If this is overridden, 
+don't forget to set the alias again so the trigger can execute.
+
+
+
+=head2 _stop()
+
+Provides a default _stop event handler that will be invoked from POE once the 
+Session's refcount from within POE has reached zero (no pending events, no
+event sources, etc). The default method merely clears out the alias.
+
+
+
+=head2 _default(ArrayRef $args)
+
+Provides a _default event handler to catch any POE event invocations that your
+instance does not actually have. Will 'warn' about the nonexistent state. A big
+difference from POE::Session is that the state and arguments are not rebundled 
+upon invocation of this event handler. Instead the attempted state will be
+available in the poe attribute, but the arguments are still bundled into a 
+single ArrayRef
+
+
+
+=head2 _child(Str $event, Session $child, Any $ret?)
+
+Provides a _child event handler that will be invoked when child sesssions are
+created, destroyed or reassigned to or from another parent. See POE::Kernel for
+more details on this event and its semantics
+
+
+
+=head2 _parent(Session $previous_parent, Session $new_parent)
+
+Provides a _parent event handler. This is used to notify children session when
+their parent has changes. See POE::Kernel for more details on this event.
+
+
+
+=head2 after BUILD
+
+All of the magic for turning the constructed object into a Session happens in 
+this method. If a BUILD is not provided, a stub exists to make sure this advice
+is executed.
+
+
+
 =head1 AUTHOR
 
-Copyright 2009 Nicholas Perez.
-Released and distributed under the GPL.
+  Nicholas Perez <nperez@cpan.org>
 
-=cut
+=head1 COPYRIGHT AND LICENSE
 
-1;
+This software is Copyright (c) 2009 by Nicholas Perez.
+
+This is free software, licensed under:
+
+  The GNU General Public License, Version 3, June 2007
+
+=cut 
+
+
+
+__END__
+

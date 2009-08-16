@@ -1,0 +1,14 @@
+Revision history for POEx-Role-SessionInstantiation 0.092280
+
+0.092280  2009-08-16 21:06:53 UTC
+        Redo tracing to now be a simple if statement before invocation
+        Throw away method heuristics in exchange for declarative method traits
+        Redo dist using Dist::Zilla
+        Redo POD to use PodPurler
+        Advice now works on methods declared as events
+        Reworked docs/code to use immediate 'with' usage
+        removed 'use signatures;'
+        should be 5.8.X safe. We'll see after CPAN Testers gets a hold of it
+
+0.01    2009-05-05
+        Initial release
