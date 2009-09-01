@@ -1,5 +1,5 @@
 package POEx::Role::Event;
-our $VERSION = '0.092280';
+our $VERSION = '0.092440';
 
 
 #ABSTRACT: Provide a decorator to label events
@@ -21,7 +21,7 @@ POEx::Role::Event - Provide a decorator to label events
 
 =head1 VERSION
 
-version 0.092280
+version 0.092440
 
 =head1 AUTHOR
 

@@ -1,5 +1,5 @@
 package POEx::Role::SessionInstantiation;
-our $VERSION = '0.092280';
+our $VERSION = '0.092440';
 
 use MooseX::Declare;
 
@@ -150,7 +150,7 @@ role POEx::Role::SessionInstantiation
         isa => 'Class::MOP::Class'
     );
     # add some sugar for posting, yielding, and calling events
-    method post(SessionAlias|SessionID|Session|DoesSessionInstantiation $session, Str $event_name, @args) 
+    method post(SessionRefIdAliasInstantiation $session, Str $event_name, @args) 
     {
         confess('No POE context') if not defined($self->poe->kernel);
         return $self->poe->kernel->post($session, $event_name, @args);
@@ -162,7 +162,7 @@ role POEx::Role::SessionInstantiation
         return $self->poe->kernel->yield($event_name, @args);
     }
 
-    method call(SessionAlias|SessionID|Session|DoesSessionInstantiation $session, Str $event_name, @args) 
+    method call(SessionRefIdAliasInstantiation $session, Str $event_name, @args) 
     {
         confess('No POE context') if not defined($self->poe->kernel);
         return $self->poe->kernel->call($session, $event_name, @args);
@@ -515,11 +515,12 @@ POEx::Role::SessionInstantiation - A Moose Role for turning objects into POE Ses
 
 =head1 VERSION
 
-version 0.092280
+version 0.092440
 
 =head1 SYOPSIS
 
     package My::Class;
+
     use 5.010;
     use MooseX::Declare;
 
