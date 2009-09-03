@@ -1,5 +1,5 @@
 package POEx::Role::SessionInstantiation;
-our $VERSION = '0.092440';
+our $VERSION = '0.092460';
 
 use MooseX::Declare;
 
@@ -515,7 +515,7 @@ POEx::Role::SessionInstantiation - A Moose Role for turning objects into POE Ses
 
 =head1 VERSION
 
-version 0.092440
+version 0.092460
 
 =head1 SYOPSIS
 

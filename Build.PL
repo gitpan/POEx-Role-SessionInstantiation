@@ -15,8 +15,7 @@ my $build = Module::Build->new(
   requires      => {
     "Test::More" => '0.92',
     "MooseX::Declare" => '0.29',
-    "POE" => '1.007',
-    "POEx::Types" => '0.092430',
+    "POEx::Types" => '0.092460',
   },
   script_files => [ qw() ],
 );

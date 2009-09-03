@@ -10,9 +10,8 @@ meta-spec:
 name: POEx-Role-SessionInstantiation
 requires:
   MooseX::Declare: 0.29
-  POE: 1.007
-  POEx::Types: 0.092430
+  POEx::Types: 0.092460
   Test::More: 0.92
 resources:
   repository: git://github.com/nperez/psm.git
-version: 0.092440
+version: 0.092460
