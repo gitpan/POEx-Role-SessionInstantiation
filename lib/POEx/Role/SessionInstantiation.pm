@@ -1,4 +1,6 @@
-{package POEx::Role::SessionInstantiation;}
+{package POEx::Role::SessionInstantiation;
+our $VERSION = '0.092671';}
+
 use MooseX::Declare;
 
 #ABSTRACT: A Moose Role for turning objects into POE Sessions
@@ -51,11 +53,13 @@ POEx::Role::SessionInstantiation - A Moose Role for turning objects into POE Ses
 
 =head1 VERSION
 
-version 0.092670
+version 0.092671
 
 =head1 SYOPSIS
 
     package My::Class;
+our $VERSION = '0.092671';
+
     use 5.010;
     use MooseX::Declare;
 

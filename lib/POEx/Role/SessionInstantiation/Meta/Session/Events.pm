@@ -1,4 +1,6 @@
-{package POEx::Role::SessionInstantiation::Meta::Session::Events;}
+{package POEx::Role::SessionInstantiation::Meta::Session::Events;
+our $VERSION = '0.092671';}
+
 
 #ABSTRACT: Provides default events such as _start, _stop, etc
 
@@ -61,7 +63,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Events - Provides default event
 
 =head1 VERSION
 
-version 0.092670
+version 0.092671
 
 =head1 METHODS
 

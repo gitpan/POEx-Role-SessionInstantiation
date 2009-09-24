@@ -1,4 +1,6 @@
-{package MyTrait;}
+{package MyTrait;
+our $VERSION = '0.092671';}
+
 use MooseX::Declare;
 
 role MyTrait(Str :$attr = 'blarg')

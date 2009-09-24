@@ -1,4 +1,6 @@
-{package POEx::Role::SessionInstantiation::Meta::POEState;}
+{package POEx::Role::SessionInstantiation::Meta::POEState;
+our $VERSION = '0.092671';}
+
 
 use MooseX::Declare;
 
@@ -42,7 +44,7 @@ POEx::Role::SessionInstantiation::Meta::POEState - A read-only object that provi
 
 =head1 VERSION
 
-version 0.092670
+version 0.092671
 
 =head1 ATTRIBUTES
 
