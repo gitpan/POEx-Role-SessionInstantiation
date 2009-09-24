@@ -7,7 +7,14 @@ README
 dist.ini
 lib/POEx/Role/Event.pm
 lib/POEx/Role/SessionInstantiation.pm
+lib/POEx/Role/SessionInstantiation/Meta/POEState.pm
+lib/POEx/Role/SessionInstantiation/Meta/Session/Events.pm
+lib/POEx/Role/SessionInstantiation/Meta/Session/Implementation.pm
+lib/POEx/Role/SessionInstantiation/Meta/Session/Magic.pm
+lib/POEx/Role/SessionInstantiation/Meta/Session/Sugar.pm
 t/00-load.t
 t/01-basic.t
+t/02-traits.t
+t/lib/MyTrait.pm
 t/release-pod-coverage.t
 t/release-pod-syntax.t
