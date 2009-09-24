@@ -1,6 +1,6 @@
-Revision history for POEx-Role-SessionInstantiation: 0.092671
+Revision history for POEx-Role-SessionInstantiation: 0.092672
 
-0.092671  2009-09-24 21:36:29 UTC
+0.092672  2009-09-24 21:51:21 UTC
         Update deps
         Major refactor of guts to break out functionality into different roles
         Implement traits (even parameterized ones) via import

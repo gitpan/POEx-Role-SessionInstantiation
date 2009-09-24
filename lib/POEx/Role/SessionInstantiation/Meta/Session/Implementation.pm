@@ -1,5 +1,6 @@
 {package POEx::Role::SessionInstantiation::Meta::Session::Implementation;
-our $VERSION = '0.092671';}
+our $VERSION = '0.092672';
+}
 
 
 #ABSTRACT: Provides actual POE::Session implementation
@@ -279,7 +280,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Implementation - Provides actua
 
 =head1 VERSION
 
-version 0.092671
+version 0.092672
 
 =head1 ATTRIBUTES
 
