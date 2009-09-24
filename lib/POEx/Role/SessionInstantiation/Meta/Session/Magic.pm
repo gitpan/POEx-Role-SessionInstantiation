@@ -1,5 +1,5 @@
 {package POEx::Role::SessionInstantiation::Meta::Session::Magic;
-our $VERSION = '0.092672';
+our $VERSION = '0.092673';
 }
 
 
@@ -42,9 +42,19 @@ role POEx::Role::SessionInstantiation::Meta::Session::Magic
         isa => 'Class::MOP::Class'
     );
     
-    sub BUILD { 1; }
+    sub BUILD { 1 }
 
-    after BUILD
+    after BUILD { $self->_post_build() }
+
+
+    method _post_build
+    {
+        $self->_overload_magic();
+        $self->_poe_register();
+    }
+
+
+    method _overload_magic
     {
         #enable overload in the composed class (ripped from overload.pm)
         {
@@ -57,10 +67,15 @@ role POEx::Role::SessionInstantiation::Meta::Session::Magic
         # we need a no-op bless here to activate the magic for overload
         bless ({}, $self->meta->name);
         
+    }
+
+
+    method _poe_register
+    {
         #this registers us with the POE::Kernel
         $POE::Kernel::poe_kernel->session_alloc($self, @{$self->args()})
             if not $self->orig;
-    };
+    }
 
 
     method _clone_self
@@ -140,7 +155,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Magic - Provides the magic nece
 
 =head1 VERSION
 
-version 0.092672
+version 0.092673
 
 =head1 ATTRIBUTES
 
@@ -181,7 +196,28 @@ provided arguments.
 
 All of the magic for turning the constructed object into a Session happens in 
 this method. If a BUILD is not provided, a stub exists to make sure this advice
-is executed.
+is executed. Internally, it delegates actual execution to _post_build to allow
+it to be advised.
+
+
+
+=head2 _post_build
+
+_post_build does the magic of making sure our overload magic is activated and
+that we are registered with POE via $poe_kernel->session_alloc.
+
+
+
+=head2 _overload_magic
+
+To active the overload magic, use this method. This is what _post_build uses.
+
+
+
+=head2 _poe_register
+
+To register this instance with POE, use this method. This is what _post_build
+uses.
 
 
 

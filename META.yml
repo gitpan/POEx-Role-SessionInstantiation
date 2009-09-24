@@ -15,4 +15,4 @@ requires:
   Test::More: 0.92
 resources:
   repository: git://github.com/nperez/psm.git
-version: 0.092672
+version: 0.092673

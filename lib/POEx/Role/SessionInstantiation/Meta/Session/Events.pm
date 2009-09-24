@@ -1,5 +1,5 @@
 {package POEx::Role::SessionInstantiation::Meta::Session::Events;
-our $VERSION = '0.092672';
+our $VERSION = '0.092673';
 }
 
 
@@ -64,7 +64,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Events - Provides default event
 
 =head1 VERSION
 
-version 0.092672
+version 0.092673
 
 =head1 METHODS
 

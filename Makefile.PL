@@ -9,7 +9,7 @@ WriteMakefile(
   NAME      => 'POEx::Role::SessionInstantiation',
   AUTHOR    => 'Nicholas\ Perez\ \<nperez\@cpan\.org\>',
   ABSTRACT  => 'Moose\ Role\ for\ turning\ ordinary\ objects\ into\ POE\ sessions',
-  VERSION   => '0.092672',
+  VERSION   => '0.092673',
   EXE_FILES => [ qw() ],
   (eval { ExtUtils::MakeMaker->VERSION(6.31) } ? (LICENSE => 'gpl') : ()),
   PREREQ_PM    => {
