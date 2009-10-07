@@ -1,4 +1,10 @@
-Revision history for POEx-Role-SessionInstantiation: 0.092673
+Revision history for POEx-Role-SessionInstantiation: 0.092800
+
+0.092800  2009-10-07 20:31:26 UTC
+        Fix removing an alias when no alias set
+        Swtich trait behavior to MooseX::CompileTime::Traits
+        Adjust docs to reflect mx-ct-traits usage
+        Adjust traits test
 
 0.092673  2009-09-24 23:08:47 UTC
         Update deps

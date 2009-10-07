@@ -1,5 +1,5 @@
 {package POEx::Role::SessionInstantiation::Meta::Session::Magic;
-our $VERSION = '0.092673';
+our $VERSION = '0.092800';
 }
 
 
@@ -155,7 +155,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Magic - Provides the magic nece
 
 =head1 VERSION
 
-version 0.092673
+version 0.092800
 
 =head1 ATTRIBUTES
 

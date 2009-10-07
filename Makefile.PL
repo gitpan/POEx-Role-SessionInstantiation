@@ -9,10 +9,11 @@ WriteMakefile(
   NAME      => 'POEx::Role::SessionInstantiation',
   AUTHOR    => 'Nicholas\ Perez\ \<nperez\@cpan\.org\>',
   ABSTRACT  => 'Moose\ Role\ for\ turning\ ordinary\ objects\ into\ POE\ sessions',
-  VERSION   => '0.092673',
+  VERSION   => '0.092800',
   EXE_FILES => [ qw() ],
   (eval { ExtUtils::MakeMaker->VERSION(6.31) } ? (LICENSE => 'gpl') : ()),
   PREREQ_PM    => {
+    "MooseX::CompileTime::Traits" => '0.092801',
     "Test::More" => '0.92',
     "MooseX::Declare" => '0.31',
     "POE" => '1.269',

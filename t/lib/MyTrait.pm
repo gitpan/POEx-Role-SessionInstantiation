@@ -1,5 +1,5 @@
 {package MyTrait;
-our $VERSION = '0.092673';
+our $VERSION = '0.092800';
 }
 
 use MooseX::Declare;
