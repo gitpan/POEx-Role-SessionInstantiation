@@ -22,4 +22,4 @@ requires:
   overload: 0
 resources:
   repository: git://github.com/nperez/psm.git
-version: 1.100910
+version: 1.100911
