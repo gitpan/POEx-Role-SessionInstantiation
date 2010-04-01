@@ -1,7 +1,5 @@
 {package POEx::Role::SessionInstantiation::Meta::Session::Events;
-our $VERSION = '0.092800';
-}
-
+$POEx::Role::SessionInstantiation::Meta::Session::Events::VERSION = '1.100910';}
 
 #ABSTRACT: Provides default events such as _start, _stop, etc
 
@@ -31,7 +29,7 @@ role POEx::Role::SessionInstantiation::Meta::Session::Events
     }
 
 
-    method _default(ArrayRef $args?) is Event
+    method _default(Maybe[ArrayRef] $args) is Event
     {
         my $string = defined($self->alias) ? $self->alias : $self->ID;
         my $state = $self->poe->state;
@@ -39,7 +37,7 @@ role POEx::Role::SessionInstantiation::Meta::Session::Events
     }
 
 
-    method _child(Str $event, Session|DoesSessionInstantiation $child, Any $ret?) is Event
+    method _child(Str $event, Session|DoesSessionInstantiation $child, Any $ret) is Event
     {
         1;
     }
@@ -55,7 +53,6 @@ role POEx::Role::SessionInstantiation::Meta::Session::Events
 
 
 
-
 =pod
 
 =head1 NAME
@@ -64,28 +61,30 @@ POEx::Role::SessionInstantiation::Meta::Session::Events - Provides default event
 
 =head1 VERSION
 
-version 0.092800
+version 1.100910
 
-=head1 METHODS
+=head1 PRIVATE_METHODS
 
 =head2 _start
+
+    is Event
 
 Provides a default _start event handler that will be invoked from POE once the
 Session is registered with POE. The default method only takes the alias 
 attribute and sets it again to activate the trigger. If this is overridden, 
 don't forget to set the alias again so the trigger can execute.
 
-
-
 =head2 _stop()
+
+    is Event
 
 Provides a default _stop event handler that will be invoked from POE once the 
 Session's refcount from within POE has reached zero (no pending events, no
 event sources, etc). The default method merely clears out the alias.
 
+=head2 _default
 
-
-=head2 _default(ArrayRef $args)
+    (Maybe[ArrayRef] $args) is Event
 
 Provides a _default event handler to catch any POE event invocations that your
 instance does not actually have. Will 'warn' about the nonexistent state. A big
@@ -94,22 +93,20 @@ upon invocation of this event handler. Instead the attempted state will be
 available in the poe attribute, but the arguments are still bundled into a 
 single ArrayRef
 
+=head2 _child
 
-
-=head2 _child(Str $event, Session $child, Any $ret?)
+    (Str $event, Session|DoesSessionInstantiation $child, Any $ret) is Event
 
 Provides a _child event handler that will be invoked when child sesssions are
 created, destroyed or reassigned to or from another parent. See POE::Kernel for
 more details on this event and its semantics
 
+=head2 _parent
 
-
-=head2 _parent(Session $previous_parent, Session $new_parent)
+    Session|DoesSessionInstantiation|Kernel $previous_parent, Session|DoesSessionInstantiation|Kernel $new_parent) is Event
 
 Provides a _parent event handler. This is used to notify children session when
 their parent has changes. See POE::Kernel for more details on this event.
-
-
 
 =head1 AUTHOR
 
@@ -117,14 +114,12 @@ their parent has changes. See POE::Kernel for more details on this event.
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2009 by Nicholas Perez.
+This software is copyright (c) 2010 by Nicholas Perez.
 
-This is free software, licensed under:
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-  The GNU General Public License, Version 3, June 2007
-
-=cut 
-
+=cut
 
 
 __END__

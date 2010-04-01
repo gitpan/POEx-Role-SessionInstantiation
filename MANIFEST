@@ -18,3 +18,4 @@ t/02-traits.t
 t/lib/MyTrait.pm
 t/release-pod-coverage.t
 t/release-pod-syntax.t
+weaver.ini

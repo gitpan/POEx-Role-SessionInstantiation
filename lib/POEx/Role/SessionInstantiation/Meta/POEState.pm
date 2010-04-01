@@ -1,7 +1,5 @@
 {package POEx::Role::SessionInstantiation::Meta::POEState;
-our $VERSION = '0.092800';
-}
-
+$POEx::Role::SessionInstantiation::Meta::POEState::VERSION = '1.100910';}
 
 use MooseX::Declare;
 
@@ -15,6 +13,7 @@ class POEx::Role::SessionInstantiation::Meta::POEState
 
     has sender  => ( is => 'ro', isa => Kernel|Session|DoesSessionInstantiation);
     
+
     has state   => ( is => 'ro', isa => Str );
 
 
@@ -36,7 +35,6 @@ class POEx::Role::SessionInstantiation::Meta::POEState
 
 
 
-
 =pod
 
 =head1 NAME
@@ -45,48 +43,46 @@ POEx::Role::SessionInstantiation::Meta::POEState - A read-only object that provi
 
 =head1 VERSION
 
-version 0.092800
+version 1.100910
 
-=head1 ATTRIBUTES
+=head1 PUBLIC_ATTRIBUTES
 
-=head2 sender is: ro, isa: Kernel|Session|DoesSessionInstantiation
+=head2 sender 
+
+    is: ro, isa: Kernel|Session|DoesSessionInstantiation
 
 The sender of the current event can be access from here. Semantically the same
 as $_[+SENDER].
 
+=head2 state
 
-
-=head2 state is: ro, isa => Str
+    is: ro, isa => Str
 
 The state fired. This should match the current method name (unless of course
 within the _default event handler, then it will be the event name that was 
 invoked but did not exist in your object instance.
 
+=head2 kernel
 
-
-=head2 kernel is: ro, isa: Kernel
+    is: ro, isa: Kernel
 
 This is actually the POE::Kernel singleton provided as a little sugar instead
 of requiring use of $poe_kernel, etc. To make sure you are currently within a 
 POE context, check this attribute for definedness.
 
+=head2 [qw/file line from/] 
 
-
-=head2 [qw/file line from/] is: rw, isa: Maybe[Str]
+    is: rw, isa: Maybe[Str]
 
 These attributes provide tracing information from within POE. From is actually
 not used in POE::Session as far as I can tell, but it is available just in 
 case.
 
-
-
-=head1 METHODS
+=head1 PROTECTED_METHODS
 
 =head2 clone
 
 Clones the current POEState object and returns it
-
-
 
 =head1 AUTHOR
 
@@ -94,14 +90,12 @@ Clones the current POEState object and returns it
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2009 by Nicholas Perez.
+This software is copyright (c) 2010 by Nicholas Perez.
 
-This is free software, licensed under:
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-  The GNU General Public License, Version 3, June 2007
-
-=cut 
-
+=cut
 
 
 __END__

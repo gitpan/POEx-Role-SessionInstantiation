@@ -1,7 +1,5 @@
 {package POEx::Role::SessionInstantiation::Meta::Session::Implementation;
-our $VERSION = '0.092800';
-}
-
+$POEx::Role::SessionInstantiation::Meta::Session::Implementation::VERSION = '1.100910';}
 
 #ABSTRACT: Provides actual POE::Session implementation
 
@@ -92,7 +90,7 @@ role POEx::Role::SessionInstantiation::Meta::Session::Implementation
     );
 
 
-    method _invoke_state(Kernel|Session|DoesSessionInstantiation $sender, Str $state, ArrayRef $etc, Str $file?, Int $line?, Str $from?)
+    method _invoke_state(Kernel|Session|DoesSessionInstantiation $sender, Str $state, ArrayRef $etc, Maybe[Str] $file, Maybe[Int] $line, Maybe[Str] $from)
     {
         my $method = $self->meta->find_method_by_name($state) || $self->meta->find_method_by_name('_default');
 
@@ -163,7 +161,7 @@ role POEx::Role::SessionInstantiation::Meta::Session::Implementation
     }
 
 
-    method _register_state (Str $method_name, CodeRef|MooseX::Method::Signatures::Meta::Method $coderef?, Str $ignore?)
+    method _register_state (Str $method_name, Maybe[CodeRef|MooseX::Method::Signatures::Meta::Method] $coderef, Maybe[Str] $ignore)
     {
         # per instance changes
         $self = $self->_clone_self();
@@ -264,11 +262,9 @@ role POEx::Role::SessionInstantiation::Meta::Session::Implementation
             return $ref->(@args);
         }
     }
-    
 }
 
 1;
-
 
 
 
@@ -280,45 +276,29 @@ POEx::Role::SessionInstantiation::Meta::Session::Implementation - Provides actua
 
 =head1 VERSION
 
-version 0.092800
+version 1.100910
 
-=head1 ATTRIBUTES
+=head1 PUBLIC_ATTRIBUTES
 
-=head2 heap is: rw, isa: Any, default: {}, lazy: yes  
+=head2 options
 
-A traditional POE::Session provides a set aside storage space for the session
-context and that space is provided via argument to event handlers. With this 
-Role, your object gains its own heap storage via this attribute.
-
-=head2 options is: rw, isa: HashRef, default: {}, lazy: yes
+    is: rw, isa: HashRef, default: {}, lazy: yes
 
 In following the POE::Session API, sessions can take options that do various
 things related to tracing and debugging. By default, tracing => 1, will turn on
 tracing of POE event firing to your object. debug => 1, currently does nothing 
 but more object level tracing maybe enabled in future versions.
 
+=head2 args
 
-
-=head2 poe is: ro, isa: POEx::Role::SessionInstantiation::Meta::POEState
-
-The poe attribute provides runtime context for your object methods. It contains
-an POEState object with it's own attributes and methods. Runtime context is 
-built for each individual event handler invocation and then torn down to avoid
-context crosstalk. It is important to only access this attribute from within a 
-POE invoked event handler. Please see
-POEx::Role::SessionInstantiation::Meta::POEState for information regarding its
-methods and attributes.
-
-
-
-=head2 args is: rw, isa: ArrayRef, default: [], lazy: yes
+    is: rw, isa: ArrayRef, default: [], lazy: yes
 
 POE::Session's constructor provides a mechanism for passing arguments that will
 end up as arguments to the _start event handler. This is the exact same thing.
 
+=head2 alias
 
-
-=head2 alias is: rw, isa: Str, clearer: clear_alias, trigger: registers alias
+    is: rw, isa: Str, clearer: clear_alias, trigger: registers alias
 
 This attribute controls your object's alias to POE. POE allows for more than
 one alias to be assigned to any given session, but this attribute only assumes
@@ -331,20 +311,42 @@ it will actually register with POE. If you override _start, don't forget to set
 this attribute again ( $self->alias($self->alias); ) or else your alias will 
 never get registered with POE.
 
+=head2 ID 
 
-
-=head2 ID is: ro, isa: Int
+    is: ro, isa: Int
 
 This attribute will return what your POE assigned Session ID is. Must only be
 accessed after your object has been fully built (ie. after any BUILD methods).
 This ID can be used, in addition to a reference to yourself, and your defined
 alias, by other Sessions for addressing events sent through POE to your object.
 
+=head1 PROTECTED_ATTRIBUTES
 
+=head2 heap
 
-=head1 METHODS
+    is: rw, isa: Any, default: {}, lazy: yes  
 
-=head2 _invoke_state(Kernel|Session|DoesSessionInstantiation $sender, Str $state, ArrayRef $etc, Str $file?, Int $line?, Str $from?)
+A traditional POE::Session provides a set aside storage space for the session
+context and that space is provided via argument to event handlers. With this 
+Role, your object gains its own heap storage via this attribute.
+
+=head2 poe
+
+    is: ro, isa: POEx::Role::SessionInstantiation::Meta::POEState
+
+The poe attribute provides runtime context for your object methods. It contains
+an POEState object with it's own attributes and methods. Runtime context is 
+built for each individual event handler invocation and then torn down to avoid
+context crosstalk. It is important to only access this attribute from within a 
+POE invoked event handler. Please see
+POEx::Role::SessionInstantiation::Meta::POEState for information regarding its
+methods and attributes.
+
+=head1 PRIVATE_METHODS
+
+=head2 _invoke_state
+
+    (Kernel|Session|DoesSessionInstantiation $sender, Str $state, ArrayRef $etc, Maybe[Str] $file, Maybe[Int] $line, Maybe[Str] $from)
 
 _invoke_state is the dispatch method called by POE::Kernel to deliver events. 
 It will introspect via meta to find the $state given by the Kernel. If the
@@ -356,9 +358,9 @@ it can't find that, it gives up with a warning.
 Otherwise, it will build a POEState object, and then execute the method passing
 @$etc as arguments. In the case of '_default', $etc will be passed as is.
 
+=head2 _register_state
 
-
-=head2 _register_state (Str $method_name, CodeRef|MooseX::Method::Signatures::Meta::Method $coderef?, Str $ignore?)
+    (Str $method_name, Maybe[CodeRef|MooseX::Method::Signatures::Meta::Method] $coderef, Maybe[Str] $ignore)
 
 _register_state is called by the Kernel anytime an event is added to a session
 via POE::Kernel's state() method. This can happen from an arbitrary source or
@@ -367,15 +369,13 @@ from within the session itself via POE::Wheel instances.
 POE::Wheels register plain old code refs that must be wrapped appropriately.
 Otherwise it expects fullblown methods that compose POEx::Role::Event.
 
+=head2 _wheel_wrap_method
 
-
-=head2 _wheel_wrap_method (CodeRef|MooseX::Method::Signatures::Meta::Method $ref)
+    (CodeRef|MooseX::Method::Signatures::Meta::Method $ref)
 
 _wheel_wrap_method is a private method that makes sure wheel states are called
 how they think they should be called. This allows proper interaction with the
 default POE Wheel implementations.
-
-
 
 =head1 AUTHOR
 
@@ -383,14 +383,12 @@ default POE Wheel implementations.
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2009 by Nicholas Perez.
+This software is copyright (c) 2010 by Nicholas Perez.
 
-This is free software, licensed under:
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-  The GNU General Public License, Version 3, June 2007
-
-=cut 
-
+=cut
 
 
 __END__

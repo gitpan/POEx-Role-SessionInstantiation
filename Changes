@@ -1,4 +1,8 @@
-Revision history for POEx-Role-SessionInstantiation: 0.092800
+Revision history for POEx-Role-SessionInstantiation: 1.100910
+
+1.100910  2010-04-01 00:53:07 America/Chicago
+        Revamp dist and docs to newest Dist::Zilla awesomeness
+        Fix bitrot with regards to MooseX::Types::Structured::Optional vs. Maybe[Type]
 
 0.092800  2009-10-07 20:31:26 UTC
         Fix removing an alias when no alias set

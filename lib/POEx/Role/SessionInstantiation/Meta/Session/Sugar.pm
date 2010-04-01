@@ -1,7 +1,5 @@
 {package POEx::Role::SessionInstantiation::Meta::Session::Sugar;
-our $VERSION = '0.092800';
-}
-
+$POEx::Role::SessionInstantiation::Meta::Session::Sugar::VERSION = '1.100910';}
 
 #ABSTRACT: Provides some convenience methods for some POE::Kernel methods
 
@@ -33,7 +31,6 @@ role POEx::Role::SessionInstantiation::Meta::Session::Sugar
 1;
 
 
-
 =pod
 
 =head1 NAME
@@ -42,15 +39,13 @@ POEx::Role::SessionInstantiation::Meta::Session::Sugar - Provides some convenien
 
 =head1 VERSION
 
-version 0.092800
+version 1.100910
 
-=head1 METHODS
+=head1 PUBLIC_METHODS
 
 =head2 [qw/post yield call/]
 
 These are provided as sugar for the respective POE::Kernel methods.
-
-
 
 =head1 AUTHOR
 
@@ -58,14 +53,12 @@ These are provided as sugar for the respective POE::Kernel methods.
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2009 by Nicholas Perez.
+This software is copyright (c) 2010 by Nicholas Perez.
 
-This is free software, licensed under:
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-  The GNU General Public License, Version 3, June 2007
-
-=cut 
-
+=cut
 
 
 __END__

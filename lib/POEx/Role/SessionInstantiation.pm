@@ -1,7 +1,5 @@
 {package POEx::Role::SessionInstantiation;
-our $VERSION = '0.092800';
-}
-
+$POEx::Role::SessionInstantiation::VERSION = '1.100910';}
 use MooseX::Declare;
 
 #ABSTRACT: A Moose Role for turning objects into POE Sessions
@@ -18,7 +16,6 @@ role POEx::Role::SessionInstantiation with MooseX::CompileTime::Traits
 
 
 
-
 =pod
 
 =head1 NAME
@@ -27,13 +24,22 @@ POEx::Role::SessionInstantiation - A Moose Role for turning objects into POE Ses
 
 =head1 VERSION
 
-version 0.092800
+version 1.100910
+
+=head1 DESCRIPTION
+
+POEx::Role::SessionInstantiation provides a nearly seamless integration for 
+non-POE objects into a POE environment. It does this by handling the POE stuff
+behind the scenes including allowing per instances method changes, session 
+registration to the Kernel, and providing some defaults like setting an alias
+if supplied via the attribute or constructor argument, or defining a _default
+that warns if your object receives an event that it does not have.
+
+This role exposes your class' methods as POE events.
 
 =head1 SYOPSIS
 
     package My::Class;
-our $VERSION = '0.092800';
-
     use 5.010;
     use MooseX::Declare;
 
@@ -85,19 +91,6 @@ our $VERSION = '0.092800';
     # Still need to call ->run();
     POE::Kernel->run();
 
-
-
-=head1 DESCRIPTION
-
-POEx::Role::SessionInstantiation provides a nearly seamless integration for 
-non-POE objects into a POE environment. It does this by handling the POE stuff
-behind the scenes including allowing per instances method changes, session 
-registration to the Kernel, and providing some defaults like setting an alias
-if supplied via the attribute or constructor argument, or defining a _default
-that warns if your object receives an event that it does not have.
-
-This role exposes your class' methods as POE events.
-
 =head1 NOTES
 
 Like all dangerous substances, this Role needs a big fat warning. It should be
@@ -147,7 +140,7 @@ inside the after 'BUILD' advice, and also during event handler changes from POE
 the moral to this? If you need to overload "", !=, or == in your composed class
 things will likely break. You have been warned.
 
-=back 
+=back
 
 So please heed the warnings and don't blame me if this summons the terrasque 
 into your datacenter and you left your +5 gear at home.
@@ -169,7 +162,7 @@ First let's declare a role that frobinates something at start:
     role FrobAtStart
     {
         with 'POEx::Role::SessionInstantiation::Meta::Session::Events';
-
+        
         has frobinator =>
         (
             is => 'ro', 
@@ -219,11 +212,11 @@ Now let's use them
         # need to make sure these are loaded 
         use FrobinateAtStart;
         use SomeLogger;
-
+        
         # and now the magic
         use POEx::Role::SessionInstantiation 
             traits => [ 'FrobAtStart', SomeLogger => { foo => 'log' } ];
-
+        
         # compose it now that it has traits applied
         with 'POEx::Role::SessionInstantiation';
         ...
@@ -257,7 +250,7 @@ This role holds the delegated methods from POE::Kernel (post, yield, call)
 And this is the implementation piece that implements the POE::Session
 interface that lets POE interact with our sessions
 
-=back 
+=back
 
 Please see their POD for more details on the inner workings of this module.
 
@@ -267,14 +260,12 @@ Please see their POD for more details on the inner workings of this module.
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2009 by Nicholas Perez.
+This software is copyright (c) 2010 by Nicholas Perez.
 
-This is free software, licensed under:
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-  The GNU General Public License, Version 3, June 2007
-
-=cut 
-
+=cut
 
 
 __END__

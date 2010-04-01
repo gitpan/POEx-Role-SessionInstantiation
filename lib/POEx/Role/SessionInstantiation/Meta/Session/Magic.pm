@@ -1,7 +1,5 @@
 {package POEx::Role::SessionInstantiation::Meta::Session::Magic;
-our $VERSION = '0.092800';
-}
-
+$POEx::Role::SessionInstantiation::Meta::Session::Magic::VERSION = '1.100910';}
 
 use MooseX::Declare;
 
@@ -146,7 +144,6 @@ role POEx::Role::SessionInstantiation::Meta::Session::Magic
 }
 
 __END__
-
 =pod
 
 =head1 NAME
@@ -155,31 +152,31 @@ POEx::Role::SessionInstantiation::Meta::Session::Magic - Provides the magic nece
 
 =head1 VERSION
 
-version 0.092800
+version 1.100910
 
-=head1 ATTRIBUTES
+=head1 PRIVATE_ATTRIBUTES
 
-=head2 orig is: rw, isa: Str
+=head2 orig
+
+    is: rw, isa: Str
 
 orig stores the stringification of the original reference. This lets us
 fool POE into thinking that our new reference is the old reference.
 
+=head2 orig_name
 
-
-=head2 orig is: rw, isa: Str
+    is: rw, isa: Str
 
 This stores the original meta name that would otherwise be lost
 
+=head2 _self_meta
 
-
-=head2 _self_meta is: rw, isa: Str
+    is: rw, isa: Str
 
 This is where we store the newly created anonymous clone class to keep it from
 going out of scope
 
-
-
-=head1 METHODS
+=head1 PRIVATE_METHODS
 
 =head2 overload "", !=, ==
 
@@ -190,8 +187,6 @@ reference.
 The numeric comparisons actually use string comparisons and stringifies the 
 provided arguments.
 
-
-
 =head2 after BUILD
 
 All of the magic for turning the constructed object into a Session happens in 
@@ -199,34 +194,24 @@ this method. If a BUILD is not provided, a stub exists to make sure this advice
 is executed. Internally, it delegates actual execution to _post_build to allow
 it to be advised.
 
-
-
 =head2 _post_build
 
 _post_build does the magic of making sure our overload magic is activated and
 that we are registered with POE via $poe_kernel->session_alloc.
 
-
-
 =head2 _overload_magic
 
 To active the overload magic, use this method. This is what _post_build uses.
-
-
 
 =head2 _poe_register
 
 To register this instance with POE, use this method. This is what _post_build
 uses.
 
-
-
 =head2 _clone_self
 
 _clone_self does the initial anonymous class clone as needed to enable per
 instance modification via normal POE mechanisms.
-
-
 
 =head1 AUTHOR
 
@@ -234,12 +219,10 @@ instance modification via normal POE mechanisms.
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2009 by Nicholas Perez.
+This software is copyright (c) 2010 by Nicholas Perez.
 
-This is free software, licensed under:
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-  The GNU General Public License, Version 3, June 2007
-
-=cut 
-
+=cut
 
