@@ -1,5 +1,5 @@
-{package POEx::Role::SessionInstantiation::Meta::Session::Magic;
-$POEx::Role::SessionInstantiation::Meta::Session::Magic::VERSION = '1.100911';}
+package POEx::Role::SessionInstantiation::Meta::Session::Magic;
+$POEx::Role::SessionInstantiation::Meta::Session::Magic::VERSION = '1.100912';
 
 use MooseX::Declare;
 
@@ -152,7 +152,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Magic - Provides the magic nece
 
 =head1 VERSION
 
-version 1.100911
+version 1.100912
 
 =head1 PRIVATE_ATTRIBUTES
 
