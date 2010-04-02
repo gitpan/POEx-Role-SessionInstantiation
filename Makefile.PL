@@ -23,13 +23,14 @@ my %WriteMakefileArgs = (
                                            },
                        'ABSTRACT' => 'Moose Role for turning ordinary objects into POE sessions',
                        'EXE_FILES' => [],
-                       'VERSION' => '1.100912',
+                       'VERSION' => '1.100920',
                        'PREREQ_PM' => {
                                         'MooseX::Types::Moose' => '0',
                                         'MooseX::Declare' => '0',
-                                        'MooseX::Types' => '0',
                                         'overload' => '0',
                                         'aliased' => '0',
+                                        'MooseX::CompileTime::Traits' => '0',
+                                        'MooseX::Types' => '0',
                                         'POE' => '0',
                                         'POEx::Types' => '0'
                                       },

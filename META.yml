@@ -13,6 +13,7 @@ meta-spec:
   version: 1.4
 name: POEx-Role-SessionInstantiation
 requires:
+  MooseX::CompileTime::Traits: 0
   MooseX::Declare: 0
   MooseX::Types: 0
   MooseX::Types::Moose: 0
@@ -22,4 +23,4 @@ requires:
   overload: 0
 resources:
   repository: git://github.com/nperez/psm.git
-version: 1.100912
+version: 1.100920

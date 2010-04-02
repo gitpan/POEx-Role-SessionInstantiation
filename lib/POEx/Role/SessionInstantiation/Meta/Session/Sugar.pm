@@ -1,5 +1,5 @@
 package POEx::Role::SessionInstantiation::Meta::Session::Sugar;
-$POEx::Role::SessionInstantiation::Meta::Session::Sugar::VERSION = '1.100912';
+$POEx::Role::SessionInstantiation::Meta::Session::Sugar::VERSION = '1.100920';
 
 #ABSTRACT: Provides some convenience methods for some POE::Kernel methods
 
@@ -40,7 +40,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Sugar - Provides some convenien
 
 =head1 VERSION
 
-version 1.100912
+version 1.100920
 
 =head1 PUBLIC_METHODS
 
