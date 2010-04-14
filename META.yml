@@ -6,12 +6,13 @@ build_requires:
   Test::More: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.31
-generated_by: 'Dist::Zilla version 2.100880'
+generated_by: 'Dist::Zilla version 2.100922'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: POEx-Role-SessionInstantiation
+recommends: {}
 requires:
   MooseX::CompileTime::Traits: 0
   MooseX::Declare: 0
@@ -23,4 +24,4 @@ requires:
   overload: 0
 resources:
   repository: git://github.com/nperez/psm.git
-version: 1.100920
+version: 1.101040

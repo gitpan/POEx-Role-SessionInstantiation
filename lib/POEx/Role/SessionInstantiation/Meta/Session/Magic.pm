@@ -1,5 +1,7 @@
 package POEx::Role::SessionInstantiation::Meta::Session::Magic;
-$POEx::Role::SessionInstantiation::Meta::Session::Magic::VERSION = '1.100920';
+BEGIN {
+  $POEx::Role::SessionInstantiation::Meta::Session::Magic::VERSION = '1.101040';
+}
 
 use MooseX::Declare;
 
@@ -94,7 +96,7 @@ role POEx::Role::SessionInstantiation::Meta::Session::Magic
 
         my $anon = Moose::Meta::Class->create_anon_class
         (   
-            superclasses => [ $meta->superclasses() ],
+            superclasses => [ $meta->superclasses(), $meta->name ],
             methods => { map { $_->name,  $_  } $meta->get_all_methods },
             attributes => [ $meta->get_all_attributes() ],
         );
@@ -152,7 +154,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Magic - Provides the magic nece
 
 =head1 VERSION
 
-version 1.100920
+version 1.101040
 
 =head1 PRIVATE_ATTRIBUTES
 
