@@ -1,31 +1,27 @@
 package POEx::Role::SessionInstantiation::Meta::Session::Sugar;
 BEGIN {
-  $POEx::Role::SessionInstantiation::Meta::Session::Sugar::VERSION = '1.101040';
+  $POEx::Role::SessionInstantiation::Meta::Session::Sugar::VERSION = '1.102610';
 }
 
 #ABSTRACT: Provides some convenience methods for some POE::Kernel methods
 
 use MooseX::Declare;
 
-role POEx::Role::SessionInstantiation::Meta::Session::Sugar
-{
+role POEx::Role::SessionInstantiation::Meta::Session::Sugar {
     use POEx::Types(':all');
 
     
-    method post(SessionAlias|SessionID|Session|DoesSessionInstantiation $session, Str $event_name, @args) 
-    {
+    method post(SessionAlias|SessionID|Session|DoesSessionInstantiation $session, Str $event_name, @args) {
         confess('No POE context') if not defined($self->poe->kernel);
         return $self->poe->kernel->post($session, $event_name, @args);
     }
 
-    method yield(Str $event_name, @args)
-    {
+    method yield(Str $event_name, @args) {
         confess('No POE context') if not defined($self->poe->kernel);
         return $self->poe->kernel->yield($event_name, @args);
     }
 
-    method call(SessionAlias|SessionID|Session|DoesSessionInstantiation $session, Str $event_name, @args) 
-    {
+    method call(SessionAlias|SessionID|Session|DoesSessionInstantiation $session, Str $event_name, @args) {
         confess('No POE context') if not defined($self->poe->kernel);
         return $self->poe->kernel->call($session, $event_name, @args);
     }
@@ -42,7 +38,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Sugar - Provides some convenien
 
 =head1 VERSION
 
-version 1.101040
+version 1.102610
 
 =head1 PUBLIC_METHODS
 
@@ -52,7 +48,7 @@ These are provided as sugar for the respective POE::Kernel methods.
 
 =head1 AUTHOR
 
-  Nicholas Perez <nperez@cpan.org>
+Nicholas Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 

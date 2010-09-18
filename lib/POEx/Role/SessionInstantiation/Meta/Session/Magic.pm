@@ -1,14 +1,13 @@
 package POEx::Role::SessionInstantiation::Meta::Session::Magic;
 BEGIN {
-  $POEx::Role::SessionInstantiation::Meta::Session::Magic::VERSION = '1.101040';
+  $POEx::Role::SessionInstantiation::Meta::Session::Magic::VERSION = '1.102610';
 }
 
 use MooseX::Declare;
 
 #ABSTRACT: Provides the magic necessary to integrate with POE
 
-role POEx::Role::SessionInstantiation::Meta::Session::Magic
-{
+role POEx::Role::SessionInstantiation::Meta::Session::Magic {
     use POE;
     use MooseX::Types::Moose(':all');
 
@@ -47,15 +46,13 @@ role POEx::Role::SessionInstantiation::Meta::Session::Magic
     after BUILD { $self->_post_build() }
 
 
-    method _post_build
-    {
+    method _post_build {
         $self->_overload_magic();
         $self->_poe_register();
     }
 
 
-    method _overload_magic
-    {
+    method _overload_magic {
         #enable overload in the composed class (ripped from overload.pm)
         {
             no strict 'refs';
@@ -70,16 +67,14 @@ role POEx::Role::SessionInstantiation::Meta::Session::Magic
     }
 
 
-    method _poe_register
-    {
+    method _poe_register {
         #this registers us with the POE::Kernel
         $POE::Kernel::poe_kernel->session_alloc($self, @{$self->args()})
             if not $self->orig;
     }
 
 
-    method _clone_self
-    {
+    method _clone_self {
         # we only need to clone once
         if($self->orig)
         {
@@ -154,7 +149,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Magic - Provides the magic nece
 
 =head1 VERSION
 
-version 1.101040
+version 1.102610
 
 =head1 PRIVATE_ATTRIBUTES
 
@@ -217,7 +212,7 @@ instance modification via normal POE mechanisms.
 
 =head1 AUTHOR
 
-  Nicholas Perez <nperez@cpan.org>
+Nicholas Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 

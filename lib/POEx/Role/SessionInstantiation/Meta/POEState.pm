@@ -1,6 +1,6 @@
 package POEx::Role::SessionInstantiation::Meta::POEState;
 BEGIN {
-  $POEx::Role::SessionInstantiation::Meta::POEState::VERSION = '1.101040';
+  $POEx::Role::SessionInstantiation::Meta::POEState::VERSION = '1.102610';
 }
 
 use MooseX::Declare;
@@ -27,8 +27,7 @@ class POEx::Role::SessionInstantiation::Meta::POEState
     has from    => ( is => 'ro', isa => Maybe[Str] );
 
 
-    method clone
-    {
+    method clone {
         return $self->meta->clone_object($self);
     }
 }
@@ -45,7 +44,7 @@ POEx::Role::SessionInstantiation::Meta::POEState - A read-only object that provi
 
 =head1 VERSION
 
-version 1.101040
+version 1.102610
 
 =head1 PUBLIC_ATTRIBUTES
 
@@ -88,7 +87,7 @@ Clones the current POEState object and returns it
 
 =head1 AUTHOR
 
-  Nicholas Perez <nperez@cpan.org>
+Nicholas Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 

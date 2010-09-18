@@ -1,6 +1,6 @@
 package POEx::Role::Event;
 BEGIN {
-  $POEx::Role::Event::VERSION = '1.101040';
+  $POEx::Role::Event::VERSION = '1.102610';
 }
 
 #ABSTRACT: Provide a decorator to label events
@@ -21,11 +21,11 @@ POEx::Role::Event - Provide a decorator to label events
 
 =head1 VERSION
 
-version 1.101040
+version 1.102610
 
 =head1 AUTHOR
 
-  Nicholas Perez <nperez@cpan.org>
+Nicholas Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 

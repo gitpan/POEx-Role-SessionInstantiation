@@ -1,6 +1,7 @@
 Changes
 LICENSE
 MANIFEST
+META.json
 META.yml
 Makefile.PL
 README
@@ -16,6 +17,5 @@ t/00-load.t
 t/01-basic.t
 t/02-traits.t
 t/lib/MyTrait.pm
-t/release-pod-coverage.t
 t/release-pod-syntax.t
 weaver.ini

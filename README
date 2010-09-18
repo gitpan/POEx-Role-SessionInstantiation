@@ -1,9 +1,9 @@
 
 
 This archive contains the distribution POEx-Role-SessionInstantiation,
-version 1.101040:
+version 1.102610:
 
-  Moose Role for turning ordinary objects into POE sessions
+  A Moose Role for turning objects into POE Sessions
 
 This software is copyright (c) 2010 by Nicholas Perez.
 

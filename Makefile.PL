@@ -9,37 +9,47 @@ use ExtUtils::MakeMaker 6.31;
 
 
 my %WriteMakefileArgs = (
-                       'test' => {
-                                   'TESTS' => 't/*.t'
-                                 },
-                       'NAME' => 'POEx::Role::SessionInstantiation',
-                       'DISTNAME' => 'POEx-Role-SessionInstantiation',
-                       'CONFIGURE_REQUIRES' => {
-                                                 'ExtUtils::MakeMaker' => '6.31'
-                                               },
-                       'AUTHOR' => 'Nicholas Perez <nperez@cpan.org>',
-                       'BUILD_REQUIRES' => {
-                                             'Test::More' => '0'
-                                           },
-                       'ABSTRACT' => 'Moose Role for turning ordinary objects into POE sessions',
-                       'EXE_FILES' => [],
-                       'VERSION' => '1.101040',
-                       'PREREQ_PM' => {
-                                        'MooseX::Types::Moose' => '0',
-                                        'MooseX::Declare' => '0',
-                                        'overload' => '0',
-                                        'aliased' => '0',
-                                        'MooseX::CompileTime::Traits' => '0',
-                                        'MooseX::Types' => '0',
-                                        'POE' => '0',
-                                        'POEx::Types' => '0'
-                                      },
-                       'LICENSE' => 'perl'
-                     );
+  'ABSTRACT' => 'A Moose Role for turning objects into POE Sessions',
+  'AUTHOR' => 'Nicholas Perez <nperez@cpan.org>',
+  'BUILD_REQUIRES' => {
+    'Test::More' => '0'
+  },
+  'CONFIGURE_REQUIRES' => {
+    'ExtUtils::MakeMaker' => '6.31'
+  },
+  'DISTNAME' => 'POEx-Role-SessionInstantiation',
+  'EXE_FILES' => [],
+  'LICENSE' => 'perl',
+  'NAME' => 'POEx::Role::SessionInstantiation',
+  'PREREQ_PM' => {
+    'MooseX::CompileTime::Traits' => '0',
+    'MooseX::Declare' => '0',
+    'MooseX::Types' => '0',
+    'MooseX::Types::Moose' => '0',
+    'POE' => '0',
+    'POEx::Types' => '0',
+    'aliased' => '0',
+    'overload' => '0'
+  },
+  'VERSION' => '1.102610',
+  'test' => {
+    'TESTS' => 't/*.t'
+  }
+);
 
 
-delete $WriteMakefileArgs{BUILD_REQUIRES}
-  unless eval { ExtUtils::MakeMaker->VERSION(6.56) };
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
+  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
+  my $pp = $WriteMakefileArgs{PREREQ_PM};
+  for my $mod ( keys %$br ) {
+    if ( exists $pp->{$mod} ) {
+      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
+    }
+    else {
+      $pp->{$mod} = $br->{$mod};
+    }
+  }
+}
 
 delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
   unless eval { ExtUtils::MakeMaker->VERSION(6.52) };

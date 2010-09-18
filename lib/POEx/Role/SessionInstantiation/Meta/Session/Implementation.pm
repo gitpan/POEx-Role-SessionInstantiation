@@ -1,14 +1,13 @@
 package POEx::Role::SessionInstantiation::Meta::Session::Implementation;
 BEGIN {
-  $POEx::Role::SessionInstantiation::Meta::Session::Implementation::VERSION = '1.101040';
+  $POEx::Role::SessionInstantiation::Meta::Session::Implementation::VERSION = '1.102610';
 }
 
 #ABSTRACT: Provides actual POE::Session implementation
 
 use MooseX::Declare;
 
-role POEx::Role::SessionInstantiation::Meta::Session::Implementation
-{
+role POEx::Role::SessionInstantiation::Meta::Session::Implementation {
     use POE;
     use MooseX::Types;
     use POEx::Types(':all');
@@ -46,8 +45,7 @@ role POEx::Role::SessionInstantiation::Meta::Session::Implementation
         lazy_build => 1,
     );
 
-    method _build_poe
-    {
+    method _build_poe {
         return POEState->new();
     }
 
@@ -74,8 +72,7 @@ role POEx::Role::SessionInstantiation::Meta::Session::Implementation
         clearer => '_clear_alias',
     );
     
-    method clear_alias
-    {
+    method clear_alias {
         # we need to check to make sure we are currently in a POE context
         return if not defined($self->poe->kernel);
         $self->poe->kernel->alias_remove($self->alias()) if $self->alias;
@@ -92,8 +89,7 @@ role POEx::Role::SessionInstantiation::Meta::Session::Implementation
     );
 
 
-    method _invoke_state(Kernel|Session|DoesSessionInstantiation $sender, Str $state, ArrayRef $etc, Maybe[Str] $file, Maybe[Int] $line, Maybe[Str] $from)
-    {
+    method _invoke_state(Kernel|Session|DoesSessionInstantiation $sender, Str $state, ArrayRef $etc, Maybe[Str] $file, Maybe[Int] $line, Maybe[Str] $from) {
         my $method = $self->meta->find_method_by_name($state) || $self->meta->find_method_by_name('_default');
 
         if(defined($method))
@@ -163,8 +159,7 @@ role POEx::Role::SessionInstantiation::Meta::Session::Implementation
     }
 
 
-    method _register_state (Str $method_name, Maybe[CodeRef|MooseX::Method::Signatures::Meta::Method] $coderef, Maybe[Str] $ignore)
-    {
+    method _register_state (Str $method_name, Maybe[CodeRef|MooseX::Method::Signatures::Meta::Method] $coderef, Maybe[Str] $ignore) {
         # per instance changes
         $self = $self->_clone_self();
 
@@ -231,8 +226,7 @@ role POEx::Role::SessionInstantiation::Meta::Session::Implementation
 
 
     # Note: this is a horrible hack.
-    method _wheel_wrap_method (CodeRef|MooseX::Method::Signatures::Meta::Method $ref)
-    {
+    method _wheel_wrap_method (CodeRef|MooseX::Method::Signatures::Meta::Method $ref) {
         sub
         {
             my $obj = shift;
@@ -278,7 +272,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Implementation - Provides actua
 
 =head1 VERSION
 
-version 1.101040
+version 1.102610
 
 =head1 PUBLIC_ATTRIBUTES
 
@@ -381,7 +375,7 @@ default POE Wheel implementations.
 
 =head1 AUTHOR
 
-  Nicholas Perez <nperez@cpan.org>
+Nicholas Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 

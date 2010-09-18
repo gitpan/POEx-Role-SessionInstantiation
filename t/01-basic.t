@@ -4,44 +4,36 @@ use MooseX::Declare;
 
 my $test = 0;
 
-class My::Session
-{
+class My::Session {
     use aliased 'POEx::Role::Event';
     with 'POEx::Role::SessionInstantiation';
 
-    method _stop is Event
-    {
+    method _stop is Event {
         Test::More::pass('Stop called');
     }
     
-    after _start(@args) is Event
-    {
+    after _start(@args) is Event {
         Test::More::pass('Start called');
         $self->yield('foo');
     }
 
-    method foo is Event
-    {
+    method foo is Event {
         Test::More::pass('foo called');
         if($test == 0)
         {
             $self->poe()->kernel()->state
             (
                 'bar',
-                method
-                {
+                method {
                     Test::More::pass('bar called');
                     
-                    class Foo  
-                    { 
+                    class Foo { 
                         with 'POEx::Role::SessionInstantiation';
                         use aliased 'POEx::Role::Event'; 
-                        after _start is Event 
-                        { 
+                        after _start is Event { 
                             Test::More::pass('after _start called'); 
                         } 
-                        method blat is Event 
-                        { 
+                        method blat is Event  { 
                             Test::More::pass('blat called');
                             $self->clear_alias;
                         } 
@@ -50,17 +42,14 @@ class My::Session
                     Foo->new( options => { 'trace' => 1 }, alias => 'blat_alias' );
                     $self->post('blat_alias', 'blat');
                     
-                    class Bar 
-                    { 
+                    class Bar { 
                         with 'POEx::Role::SessionInstantiation';
                         use aliased 'POEx::Role::Event'; 
-                        method flarg is Event 
-                        { 
+                        method flarg is Event { 
                             Test::More::pass('flarg called');
                             $self->clear_alias;
                         } 
-                        before _stop is Event
-                        {
+                        before _stop is Event {
                             Test::More::pass('before _stop called');
                         }
                     }
@@ -89,8 +78,7 @@ class My::Session
         $self->yield('bar');
     }
 
-    method _default(@args) is Event
-    {
+    method _default(@args) is Event {
         if($self->poe->state eq 'foo')
         {
             $test++;

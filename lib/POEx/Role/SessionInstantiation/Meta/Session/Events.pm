@@ -1,20 +1,18 @@
 package POEx::Role::SessionInstantiation::Meta::Session::Events;
 BEGIN {
-  $POEx::Role::SessionInstantiation::Meta::Session::Events::VERSION = '1.101040';
+  $POEx::Role::SessionInstantiation::Meta::Session::Events::VERSION = '1.102610';
 }
 
 #ABSTRACT: Provides default events such as _start, _stop, etc
 
 use MooseX::Declare;
 
-role POEx::Role::SessionInstantiation::Meta::Session::Events
-{
+role POEx::Role::SessionInstantiation::Meta::Session::Events {
     use POEx::Types(':all');
     use aliased 'POEx::Role::Event';
 
 
-    method _start is Event
-    {
+    method _start is Event {
         if($self->alias)
         {
             # inside a poe context now, so fire the trigger
@@ -24,31 +22,23 @@ role POEx::Role::SessionInstantiation::Meta::Session::Events
     }
 
 
-    method _stop() is Event
-    { 
+    method _stop() is Event { 
         $self->clear_alias();
         1;
     }
 
 
-    method _default(Maybe[ArrayRef] $args) is Event
-    {
+    method _default(Maybe[ArrayRef] $args) is Event {
         my $string = defined($self->alias) ? $self->alias : $self->ID;
         my $state = $self->poe->state;
         warn "Nonexistent '$state' event delivered to $string";
     }
 
 
-    method _child(Str $event, Session|DoesSessionInstantiation $child, Any $ret) is Event
-    {
-        1;
-    }
+    method _child(Str $event, Session|DoesSessionInstantiation $child, Any $ret) is Event { 1; }
 
 
-    method _parent(Session|DoesSessionInstantiation|Kernel $previous_parent, Session|DoesSessionInstantiation|Kernel $new_parent) is Event
-    {
-        1;
-    }
+    method _parent(Session|DoesSessionInstantiation|Kernel $previous_parent, Session|DoesSessionInstantiation|Kernel $new_parent) is Event { 1; }
 }
 
 1;
@@ -63,7 +53,7 @@ POEx::Role::SessionInstantiation::Meta::Session::Events - Provides default event
 
 =head1 VERSION
 
-version 1.101040
+version 1.102610
 
 =head1 PRIVATE_METHODS
 
@@ -112,7 +102,7 @@ their parent has changes. See POE::Kernel for more details on this event.
 
 =head1 AUTHOR
 
-  Nicholas Perez <nperez@cpan.org>
+Nicholas Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 

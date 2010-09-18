@@ -1,14 +1,13 @@
 package POEx::Role::SessionInstantiation;
 BEGIN {
-  $POEx::Role::SessionInstantiation::VERSION = '1.101040';
+  $POEx::Role::SessionInstantiation::VERSION = '1.102610';
 }
 use MooseX::Declare;
 
 #ABSTRACT: A Moose Role for turning objects into POE Sessions
 
 
-role POEx::Role::SessionInstantiation with MooseX::CompileTime::Traits
-{
+role POEx::Role::SessionInstantiation with MooseX::CompileTime::Traits {
     with 'POEx::Role::SessionInstantiation::Meta::Session::Magic';
     with 'POEx::Role::SessionInstantiation::Meta::Session::Implementation';
     with 'POEx::Role::SessionInstantiation::Meta::Session::Events';
@@ -26,7 +25,7 @@ POEx::Role::SessionInstantiation - A Moose Role for turning objects into POE Ses
 
 =head1 VERSION
 
-version 1.101040
+version 1.102610
 
 =head1 DESCRIPTION
 
@@ -258,7 +257,7 @@ Please see their POD for more details on the inner workings of this module.
 
 =head1 AUTHOR
 
-  Nicholas Perez <nperez@cpan.org>
+Nicholas Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
